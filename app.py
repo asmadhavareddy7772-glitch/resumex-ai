@@ -92,9 +92,19 @@ def index():
 # -------------------------------------------------------------------------
 
 def is_demo_mode_active() -> bool:
-    """Returns True if Academic Offline Demo Mode is explicitly enabled."""
+    """Returns True if Academic Offline Demo Mode is enabled or default on cloud deployments."""
     key = os.getenv("GEMINI_API_KEY", "").strip()
-    return os.getenv("DEMO_MODE", "").lower() in ("true", "1") or key.upper() in ("DEMO", "DEMO_MODE", "ACADEMIC_DEMO")
+    has_real_key = bool(
+        key and len(key) > 5 and
+        key not in ("your_gemini_api_key_here", "your_actual_api_key", "your_verified_supported_model")
+    )
+    if has_real_key:
+        return False
+    if os.getenv("DEMO_MODE", "").lower() in ("true", "1"):
+        return True
+    if os.getenv("VERCEL") and not has_real_key:
+        return True
+    return key.upper() in ("DEMO", "DEMO_MODE", "ACADEMIC_DEMO")
 
 
 @app.route("/api/health", methods=["GET"])
@@ -146,8 +156,11 @@ def toggle_demo_mode():
         if not updated:
             new_lines.append(f"DEMO_MODE={'True' if enable else 'False'}\n")
 
-        with open(env_path, "w", encoding="utf-8") as f:
-            f.writelines(new_lines)
+        try:
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.writelines(new_lines)
+        except (OSError, IOError) as write_err:
+            logger.warning(f"Note: Could not write to .env (expected in serverless/Vercel read-only filesystem): {write_err}")
 
         os.environ["DEMO_MODE"] = "True" if enable else "False"
         return jsonify({
@@ -209,8 +222,11 @@ def configure_api_key():
         if not updated_model:
             new_lines.append(f"GEMINI_MODEL={active_model}\n")
 
-        with open(env_path, "w", encoding="utf-8") as f:
-            f.writelines(new_lines)
+        try:
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.writelines(new_lines)
+        except (OSError, IOError) as write_err:
+            logger.warning(f"Note: Could not write to .env (expected in serverless/Vercel read-only filesystem): {write_err}")
 
         # Update running process environment
         os.environ["GEMINI_API_KEY"] = key
