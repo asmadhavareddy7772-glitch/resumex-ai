@@ -29,3 +29,4 @@ EXPOSE 5000
 
 # Run high-concurrency production WSGI server
 CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-5000} --workers 2 --threads 4 --timeout 120"]
+

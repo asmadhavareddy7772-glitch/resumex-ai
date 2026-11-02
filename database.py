@@ -14,7 +14,11 @@ from werkzeug.security import generate_password_hash
 
 logger = logging.getLogger(__name__)
 
-DB_PATH = os.getenv("DATABASE_PATH", os.path.join(os.path.dirname(__file__), "resume_analyzer.db"))
+if os.getenv("VERCEL"):
+    DB_PATH = os.getenv("DATABASE_PATH", "/tmp/resume_analyzer.db")
+else:
+    DB_PATH = os.getenv("DATABASE_PATH", os.path.join(os.path.dirname(__file__), "resume_analyzer.db"))
+
 
 
 def get_db_connection():

@@ -57,8 +57,13 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize Flask app
-app = Flask(__name__, static_folder="static", template_folder="templates")
+# Initialize Flask app with absolute asset paths for Vercel & serverless compatibility
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    static_folder=os.path.join(BASE_DIR, "static"),
+    template_folder=os.path.join(BASE_DIR, "templates")
+)
 CORS(app)  # Enable Cross-Origin requests for React frontend
 
 # Maximum uploaded file size: 16 MB
@@ -433,23 +438,9 @@ def analyze_resume():
                     "can_switch_mode": True
                 }), 400
 
-        # Execute Analysis based on mode (Demo Mode or Gemini Live AI)
-        if is_demo_mode_active():
-            if analysis_mode == "career_goal":
-                analysis_result = generate_academic_demo_career_goal(
-                    resume_text=resume_text,
-                    career_goal=job_description
-                )
-                analysis_result["job_title"] = job_title if job_title != "Target Position" else job_description[:40]
-                analysis_result["company_name"] = "Industry Benchmark Track"
-            else:
-                analysis_result = generate_academic_demo_analysis(
-                    resume_text=resume_text,
-                    job_description=job_description
-                )
-                analysis_result["job_title"] = job_title
-                analysis_result["company_name"] = company_name
-        else:
+        # Execute Analysis: Try Live AI first (or mock in test), fallback to Academic Demo if key unconfigured
+        analysis_result = None
+        try:
             if analysis_mode == "career_goal":
                 analysis_result = analyze_career_goal(
                     resume_text=resume_text,
@@ -464,6 +455,24 @@ def analyze_resume():
                 )
                 analysis_result["job_title"] = job_title
                 analysis_result["company_name"] = company_name
+        except ValueError as ve:
+            if "GEMINI_API_KEY" in str(ve) and is_demo_mode_active():
+                if analysis_mode == "career_goal":
+                    analysis_result = generate_academic_demo_career_goal(
+                        resume_text=resume_text,
+                        career_goal=job_description
+                    )
+                    analysis_result["job_title"] = job_title if job_title != "Target Position" else job_description[:40]
+                    analysis_result["company_name"] = "Industry Benchmark Track"
+                else:
+                    analysis_result = generate_academic_demo_analysis(
+                        resume_text=resume_text,
+                        job_description=job_description
+                    )
+                    analysis_result["job_title"] = job_title
+                    analysis_result["company_name"] = company_name
+            else:
+                raise ve
 
         analysis_result["resume_filename"] = filename
         if structured_preview:
