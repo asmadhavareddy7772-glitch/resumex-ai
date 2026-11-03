@@ -265,6 +265,9 @@ Perform a rigorous, evidence-based evaluation of the Candidate's Resume against 
 === TARGET JOB DESCRIPTION ===
 {job_description}
 
+=== RETRIEVED SEMANTIC EVIDENCE (RAG PIPELINE) ===
+{rag_evidence}
+
 === STRICT EVIDENCE & SCORING RULES ===
 1. EVIDENTIARY TRUTH: Never claim the candidate possesses any skill, qualification, degree, or experience NOT explicitly evidenced in their resume.
 2. WEIGHTED SCORING METHODOLOGY:
@@ -356,9 +359,10 @@ Respond strictly in valid, clean JSON with this exact structure:
 def analyze_resume_and_jd(
     resume_text: str,
     job_description: str,
+    structured_sections: Optional[Dict[str, str]] = None,
     model_name: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Executes Mode A: Specific Job Description ATS Analysis."""
+    """Executes Mode A: Specific Job Description ATS Analysis augmented with Hybrid RAG."""
     clean_resume = sanitize_input(resume_text)
     clean_jd = sanitize_input(job_description)
 
@@ -367,9 +371,18 @@ def analyze_resume_and_jd(
     if not clean_jd or len(clean_jd) < 15:
         raise ValueError("Job description is empty or too short.")
 
+    # Execute Hybrid RAG Pipeline (ChromaDB + Gemini/Dense Embeddings + LangChain chunking)
+    from rag_service import execute_rag_pipeline
+    rag_result = execute_rag_pipeline(
+        resume_text=clean_resume,
+        job_description=clean_jd,
+        structured_sections=structured_sections
+    )
+
     prompt = ADVANCED_ATS_PROMPT.format(
         resume_text=clean_resume,
-        job_description=clean_jd
+        job_description=clean_jd,
+        rag_evidence=rag_result["rag_context_prompt"]
     )
 
     raw_response = call_gemini_raw(prompt, model_name=model_name)
@@ -394,6 +407,7 @@ def analyze_resume_and_jd(
     return {
         "analysis_mode": "job_description",
         "match_score": final_overall,
+        "rag_metadata": rag_result.get("rag_metadata", {}),
         "ats_breakdown": {
             "overall_ats_score": final_overall,
             "technical_skills_score": tech,
@@ -779,9 +793,14 @@ def generate_academic_demo_analysis(resume_text: str, job_description: str) -> D
         }
     ]
 
+    # Run Hybrid RAG Pipeline for complete evidentiary transparency
+    from rag_service import execute_rag_pipeline
+    rag_result = execute_rag_pipeline(resume_text=resume_text, job_description=job_description)
+
     return {
         "match_score": overall_ats,
         "is_academic_demo": True,
+        "rag_metadata": rag_result.get("rag_metadata", {}),
         "ats_breakdown": {
             "overall_ats_score": overall_ats,
             "technical_skills_score": tech_score,
@@ -824,10 +843,17 @@ def generate_academic_demo_career_goal(resume_text: str, career_goal: str) -> Di
     skills_dict = categorize_skills(resume_text)
     all_resume_skills = [s for sublist in skills_dict.values() for s in sublist]
 
+    from rag_service import execute_rag_pipeline
+    rag_result = execute_rag_pipeline(
+        resume_text=resume_text,
+        job_description=f"Industry core competencies, technical skills, and production requirements for {career_goal}."
+    )
+
     return {
         "analysis_mode": "career_goal",
         "match_score": 76,
         "is_academic_demo": True,
+        "rag_metadata": rag_result.get("rag_metadata", {}),
         "target_career_goal": career_goal,
         "industry_benchmark_summary": f"Industry standards for '{career_goal}' require strong software fundamentals, scalable system design, and hands-on project delivery.",
         "ready_skills": all_resume_skills[:6],

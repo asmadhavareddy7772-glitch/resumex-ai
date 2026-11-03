@@ -120,12 +120,19 @@ def health_check():
 
     return jsonify({
         "status": "healthy",
-        "service": "Generative AI-Based Resume and Job Description Analysis Platform",
+        "service": "RAG-Enhanced Generative AI-Based Resume and Job Description Analysis Platform",
         "model": "Academic Offline Heuristic Engine" if (demo_active and not has_valid_key) else os.getenv("GEMINI_MODEL", DEFAULT_MODEL),
+        "embedding_model": os.getenv("GEMINI_EMBEDDING_MODEL", "text-embedding-004"),
         "api_key_configured": is_configured,
         "demo_mode": demo_active,
         "supported_formats": ["pdf", "docx"],
-        "supported_modes": ["job_description", "career_goal"]
+        "supported_modes": ["job_description", "career_goal"],
+        "rag_architecture": {
+            "enabled": True,
+            "vector_store": "ChromaDB v1.5.9",
+            "chunker": "LangChain RecursiveCharacterTextSplitter",
+            "distance_metric": "Cosine Similarity"
+        }
     }), 200
 
 
@@ -465,9 +472,11 @@ def analyze_resume():
                 analysis_result["job_title"] = job_title if job_title != "Target Position" else job_description[:40]
                 analysis_result["company_name"] = "Industry Benchmark Track"
             else:
+                parsed_sections = parsed.get("sections") if ("parsed" in locals() and parsed) else None
                 analysis_result = analyze_resume_and_jd(
                     resume_text=resume_text,
-                    job_description=job_description
+                    job_description=job_description,
+                    structured_sections=parsed_sections
                 )
                 analysis_result["job_title"] = job_title
                 analysis_result["company_name"] = company_name

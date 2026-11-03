@@ -359,7 +359,7 @@ Requirements:
     className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
   }, systemStatus?.model || 'Gemini Flash')), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-slate-400"
-  }, "Generative AI-Based Resume & Job Description Analysis System"))), /*#__PURE__*/React.createElement("nav", {
+  }, "RAG-Enhanced Generative AI Resume & Job Description Analysis Platform"))), /*#__PURE__*/React.createElement("nav", {
     className: "hidden md:flex items-center space-x-1 text-sm font-medium"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setActiveView('analyzer'),
@@ -698,7 +698,10 @@ Requirements:
   }, "Personalized Roadmap (", currentAnalysis.learning_roadmap?.length || 0, ")"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setAnalysisTab('interview'),
     className: `pb-3 border-b-2 transition ${analysisTab === 'interview' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400'}`
-  }, "Interview Preparation (", currentAnalysis.interview_questions?.length || 0, ")")), analysisTab === 'overview' && /*#__PURE__*/React.createElement("div", {
+  }, "Interview Preparation (", currentAnalysis.interview_questions?.length || 0, ")"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setAnalysisTab('rag'),
+    className: `pb-3 border-b-2 transition flex items-center gap-1.5 ${analysisTab === 'rag' ? 'border-indigo-500 text-indigo-400 font-bold' : 'border-transparent text-slate-400'}`
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83E\uDDE0"), " RAG Vector Explorer (", currentAnalysis.rag_metadata?.semantic_matches?.length || 0, ")")), analysisTab === 'overview' && /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "p-6 rounded-2xl bg-slate-900 border border-slate-800"
@@ -872,7 +875,103 @@ Requirements:
     className: "text-indigo-400 block mb-1"
   }, "\uD83D\uDCA1 Answer Strategy:"), q.suggested_answer), q.follow_up_question && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-400 italic"
-  }, /*#__PURE__*/React.createElement("strong", null, "Follow-up:"), " \"", q.follow_up_question, "\""))))))), showKeyModal && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("strong", null, "Follow-up:"), " \"", q.follow_up_question, "\""))))))), analysisTab === 'rag' && /*#__PURE__*/React.createElement("div", {
+    className: "space-y-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-6 rounded-2xl bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-900 border border-indigo-500/30"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap items-center justify-between gap-4 mb-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", {
+    className: "text-lg font-bold text-white flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83E\uDDE0"), /*#__PURE__*/React.createElement("span", null, "Hybrid RAG Semantic Retrieval & Vector Space")), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400 mt-1"
+  }, "Powered by LangChain Recursive Character Text Chunking, Gemini text-embedding-004, and ChromaDB vector collections.")), /*#__PURE__*/React.createElement("div", {
+    className: "text-right"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-2xl font-black text-indigo-400"
+  }, (currentAnalysis.rag_metadata?.average_semantic_match_percentage || 0), "%"), /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] text-slate-400 font-bold uppercase tracking-wider"
+  }, "Mean Semantic Overlap"))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-3 rounded-xl bg-slate-950/60 border border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] text-slate-400 font-bold uppercase"
+  }, "Vector DB"), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-bold text-emerald-400 truncate"
+  }, currentAnalysis.rag_metadata?.vector_database || "ChromaDB v1.5.9")), /*#__PURE__*/React.createElement("div", {
+    className: "p-3 rounded-xl bg-slate-950/60 border border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] text-slate-400 font-bold uppercase"
+  }, "Embedding Model"), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-bold text-indigo-400 truncate"
+  }, currentAnalysis.rag_metadata?.embedding_model || "text-embedding-004")), /*#__PURE__*/React.createElement("div", {
+    className: "p-3 rounded-xl bg-slate-950/60 border border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] text-slate-400 font-bold uppercase"
+  }, "Resume Chunks"), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-bold text-white"
+  }, (currentAnalysis.rag_metadata?.total_resume_chunks || 0), " Indexed")), /*#__PURE__*/React.createElement("div", {
+    className: "p-3 rounded-xl bg-slate-950/60 border border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] text-slate-400 font-bold uppercase"
+  }, "JD Requirements"), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-bold text-white"
+  }, (currentAnalysis.rag_metadata?.total_jd_chunks || 0), " Embedded")))), /*#__PURE__*/React.createElement("div", {
+    className: "p-6 rounded-2xl bg-slate-900 border border-slate-800"
+  }, /*#__PURE__*/React.createElement("h4", {
+    className: "font-bold text-base text-white mb-4 flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCCA"), /*#__PURE__*/React.createElement("span", null, "Evidentiary Alignment Matrix (Semantic Retrieval Results)")), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-slate-400 font-normal"
+  }, "Thresholds: \u226572% Direct Match | \u226552% Partial")), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4"
+  }, (currentAnalysis.rag_metadata?.semantic_matches || []).map((m, idx) => /*#__PURE__*/React.createElement("div", {
+    key: idx,
+    className: `p-4 rounded-xl border transition ${m.match_tier === 'Direct Match' ? 'bg-emerald-500/5 border-emerald-500/20' : m.match_tier === 'Partial Match' ? 'bg-amber-500/5 border-amber-500/20' : 'bg-rose-500/5 border-rose-500/20'}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap items-center justify-between gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-300"
+  }, m.category), /*#__PURE__*/React.createElement("span", {
+    className: "font-semibold text-xs text-white"
+  }, m.requirement_text)), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `text-[10px] font-bold px-2 py-0.5 rounded-full ${m.match_tier === 'Direct Match' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : m.match_tier === 'Partial Match' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}`
+  }, m.match_tier), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-mono font-bold text-slate-300"
+  }, m.similarity_percentage, "%"))), /*#__PURE__*/React.createElement("div", {
+    className: "p-3 rounded-lg bg-slate-950/80 border border-slate-800/80 text-xs mt-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] text-slate-400 font-semibold mb-1 flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDD0D Top Retrieved Resume Evidence (Section: ", m.best_matched_section || 'general', "):"), m.best_matched_chunk_id && /*#__PURE__*/React.createElement("span", {
+    className: "font-mono text-slate-500"
+  }, m.best_matched_chunk_id)), /*#__PURE__*/React.createElement("p", {
+    className: "text-slate-300 italic"
+  }, "\"", m.evidence_text, "\"")))))), (currentAnalysis.rag_metadata?.resume_chunks_catalog?.length > 0) && /*#__PURE__*/React.createElement("div", {
+    className: "p-6 rounded-2xl bg-slate-900 border border-slate-800"
+  }, /*#__PURE__*/React.createElement("h4", {
+    className: "font-bold text-base text-white mb-3 flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDDC2\uFE0F"), /*#__PURE__*/React.createElement("span", null, "Indexed Resume Vector Chunks (LangChain Recursive Chunks)")), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400 mb-4"
+  }, "These semantically segmented chunks are embedded into ChromaDB to allow similarity retrieval against company job requirements."), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar"
+  }, currentAnalysis.rag_metadata.resume_chunks_catalog.map((c, idx) => /*#__PURE__*/React.createElement("div", {
+    key: idx,
+    className: "p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between text-[10px] text-slate-400 mb-1.5"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "font-mono font-bold text-indigo-400"
+  }, c.chunk_id), /*#__PURE__*/React.createElement("span", {
+    className: "px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold uppercase"
+  }, c.section), /*#__PURE__*/React.createElement("span", null, c.char_length, " chars")), /*#__PURE__*/React.createElement("p", {
+    className: "text-slate-300 leading-relaxed"
+  }, c.text)))))), showKeyModal && /*#__PURE__*/React.createElement("div", {
     className: "fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl relative"

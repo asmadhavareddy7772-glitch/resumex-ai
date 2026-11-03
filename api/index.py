@@ -11,3 +11,4 @@ from app import app
 # Vercel's Python runtime requires a callable named `app`
 if __name__ == "__main__":
     app.run()
+
