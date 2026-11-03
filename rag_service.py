@@ -466,3 +466,4 @@ def execute_rag_pipeline(
             "resume_chunks_catalog": [asdict(c) for c in resume_chunks[:15]]
         }
     }
+

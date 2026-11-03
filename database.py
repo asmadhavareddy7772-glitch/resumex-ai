@@ -115,6 +115,19 @@ def init_db():
         conn.commit()
         logger.info(f"Initialized default admin account: {admin_email}")
 
+    # Create default student account for instant evaluation/demo
+    student_email = "student@resumex.ai"
+    student_pass = "Student@123"
+    cursor.execute("SELECT id FROM users WHERE email = ?", (student_email,))
+    if not cursor.fetchone():
+        s_hashed = generate_password_hash(student_pass)
+        cursor.execute(
+            "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'student')",
+            ("Demo Student", student_email, s_hashed)
+        )
+        conn.commit()
+        logger.info(f"Initialized default student account: {student_email}")
+
     conn.close()
 
 
